@@ -2,40 +2,49 @@
 package day1
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
+
+	"github.com/nerdatmath/aoc2022/io"
 )
 
-func input() ([][]int, error) {
-	f, err := os.Open("day1/input.txt")
+type elf struct {
+	food []int
+}
+
+func (e elf) calories() int {
+	sum := 0
+	for _, c := range e.food {
+		sum += c
+	}
+	return sum
+}
+
+func parseElves(b []byte) ([]elf, error) {
+	groups := bytes.Split(b, []byte{'\n', '\n'})
+	elves := []elf(nil)
+	for _, g := range groups {
+		e := elf{}
+		for _, line := range bytes.Split(g, []byte{'\n'}) {
+			cals, err := strconv.Atoi(string(line))
+			if err != nil {
+				return nil, err
+			}
+			e.food = append(e.food, cals)
+		}
+		elves = append(elves, e)
+	}
+	return elves, nil
+}
+
+func input() ([]elf, error) {
+	b, err := io.OpenAndReadAll("day1/input.txt")
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	s := bufio.NewScanner(f)
-	s.Split(bufio.ScanLines)
-	elves := [][]int(nil)
-	calories := []int(nil)
-	for s.Scan() {
-		if s.Text() == "" {
-			elves = append(elves, calories)
-			calories = nil
-			continue
-		}
-		cal, err := strconv.Atoi(s.Text())
-		if err != nil {
-			return nil, err
-		}
-		calories = append(calories, cal)
-	}
-	if len(calories) > 0 {
-		elves = append(elves, calories)
-		calories = nil
-	}
-	return elves, nil
+	return parseElves(b)
 }
 
 func Part1() error {
@@ -44,13 +53,10 @@ func Part1() error {
 		return err
 	}
 	max := 0
-	for _, elf := range elves {
-		cals := 0
-		for _, cal := range elf {
-			cals += cal
-		}
-		if cals > max {
-			max = cals
+	for _, e := range elves {
+		c := e.calories()
+		if c > max {
+			max = c
 		}
 	}
 	fmt.Println("Part 1", max)
@@ -62,15 +68,11 @@ func Part2() error {
 	if err != nil {
 		return err
 	}
-	sums := []int{}
+	calories := []int{}
 	for _, elf := range elves {
-		cals := 0
-		for _, cal := range elf {
-			cals += cal
-		}
-		sums = append(sums, cals)
+		calories = append(calories, elf.calories())
 	}
-	sort.Sort(sort.Reverse(sort.IntSlice(sums)))
-	fmt.Println("Part 2", sums[0]+sums[1]+sums[2])
+	sort.Sort(sort.Reverse(sort.IntSlice(calories)))
+	fmt.Println("Part 2", calories[0]+calories[1]+calories[2])
 	return nil
 }
