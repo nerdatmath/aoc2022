@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/nerdatmath/aoc2022/day1"
+	"github.com/nerdatmath/aoc2022/day2"
 )
 
 func main() {
@@ -12,6 +13,12 @@ func main() {
 		log.Fatalln(err)
 	}
 	if err := day1.Part2(); err != nil {
+		log.Fatalln(err)
+	}
+	if err := day2.Part1(); err != nil {
+		log.Fatalln(err)
+	}
+	if err := day2.Part2(); err != nil {
 		log.Fatalln(err)
 	}
 }

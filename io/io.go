@@ -7,7 +7,7 @@ import (
 )
 
 func OpenAndReadAll(filename string) ([]byte, error) {
-	f, err := os.Open("day1/input.txt")
+	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
