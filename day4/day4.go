@@ -4,17 +4,19 @@ package day4
 import (
 	"errors"
 
-	"github.com/nerdatmath/aoc2022/io"
+	"github.com/nerdatmath/aoc2022/aoc"
 )
 
-func input() ([]byte, error) {
-	return io.OpenAndReadAll("day4/input.txt")
-}
+type solution struct{}
 
-func Part1() error {
+func (solution) Part1(p []byte) error {
 	return errors.New("notimplemented")
 }
 
-func Part2() error {
+func (solution) Part2(p []byte) error {
 	return errors.New("notimplemented")
+}
+
+func init() {
+	aoc.RegisterSolution("4", solution{})
 }

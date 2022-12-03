@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/nerdatmath/aoc2022/io"
+	"github.com/nerdatmath/aoc2022/aoc"
 )
 
 type item byte
@@ -48,10 +48,6 @@ func intersect(a, b []item) []item {
 	return intersection
 }
 
-func input() ([]byte, error) {
-	return io.OpenAndReadAll("day3/input.txt")
-}
-
 func parseRucksack(p []byte) rucksack {
 	items := []item(nil)
 	for _, b := range p {
@@ -72,12 +68,10 @@ func parseRucksacks(b []byte) []rucksack {
 	return rs
 }
 
-func Part1() error {
-	b, err := input()
-	if err != nil {
-		return err
-	}
-	rs := parseRucksacks(b)
+type solution struct{}
+
+func (solution) Part1(p []byte) error {
+	rs := parseRucksacks(p)
 	sum := 0
 	for _, r := range rs {
 		sum += r.dupe().priority()
@@ -86,12 +80,8 @@ func Part1() error {
 	return nil
 }
 
-func Part2() error {
-	b, err := input()
-	if err != nil {
-		return err
-	}
-	rs := parseRucksacks(b)
+func (solution) Part2(p []byte) error {
+	rs := parseRucksacks(p)
 	sum := 0
 	for i := 0; i < len(rs); i += 3 {
 		v := intersect(intersect(rs[i].items(), rs[i+1].items()), rs[i+2].items())
@@ -102,4 +92,8 @@ func Part2() error {
 	}
 	fmt.Println("Part 2", sum)
 	return nil
+}
+
+func init() {
+	aoc.RegisterSolution("3", solution{})
 }

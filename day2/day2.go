@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/nerdatmath/aoc2022/io"
+	"github.com/nerdatmath/aoc2022/aoc"
 )
 
 type rps int
@@ -91,10 +91,6 @@ func (o outcome) score() int {
 	return map[outcome]int{win: 6, draw: 3, loss: 0}[o]
 }
 
-func input() ([]byte, error) {
-	return io.OpenAndReadAll("day2/input.txt")
-}
-
 func parseOutcome(s string) (outcome, error) {
 	outcome, ok := map[string]outcome{"X": loss, "Y": draw, "Z": win}[s]
 	if !ok {
@@ -153,12 +149,10 @@ func parseStrategyV2(b []byte) ([]roundV2, error) {
 	return rounds, nil
 }
 
-func Part1() error {
-	b, err := input()
-	if err != nil {
-		return err
-	}
-	rounds, err := parseStrategy(b)
+type solution struct{}
+
+func (solution) Part1(p []byte) error {
+	rounds, err := parseStrategy(p)
 	if err != nil {
 		return err
 	}
@@ -170,12 +164,8 @@ func Part1() error {
 	return nil
 }
 
-func Part2() error {
-	b, err := input()
-	if err != nil {
-		return err
-	}
-	rounds, err := parseStrategyV2(b)
+func (solution) Part2(p []byte) error {
+	rounds, err := parseStrategyV2(p)
 	if err != nil {
 		return err
 	}
@@ -185,4 +175,8 @@ func Part2() error {
 	}
 	fmt.Println("Part 2", score)
 	return nil
+}
+
+func init() {
+	aoc.RegisterSolution("2", solution{})
 }

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/nerdatmath/aoc2022/io"
+	"github.com/nerdatmath/aoc2022/aoc"
 )
 
 type elf struct {
@@ -39,16 +39,10 @@ func parseElves(b []byte) ([]elf, error) {
 	return elves, nil
 }
 
-func input() ([]elf, error) {
-	b, err := io.OpenAndReadAll("day1/input.txt")
-	if err != nil {
-		return nil, err
-	}
-	return parseElves(b)
-}
+type solution struct{}
 
-func Part1() error {
-	elves, err := input()
+func (solution) Part1(b []byte) error {
+	elves, err := parseElves(b)
 	if err != nil {
 		return err
 	}
@@ -63,8 +57,8 @@ func Part1() error {
 	return nil
 }
 
-func Part2() error {
-	elves, err := input()
+func (solution) Part2(p []byte) error {
+	elves, err := parseElves(p)
 	if err != nil {
 		return err
 	}
@@ -75,4 +69,8 @@ func Part2() error {
 	sort.Sort(sort.Reverse(sort.IntSlice(calories)))
 	fmt.Println("Part 2", calories[0]+calories[1]+calories[2])
 	return nil
+}
+
+func init() {
+	aoc.RegisterSolution("1", solution{})
 }
