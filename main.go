@@ -1,4 +1,4 @@
-// Binary day1 solves the day 1 puzzle.
+// Binary aoc2022 solves the Advent of Code 2022 puzzles.
 package main
 
 import (
@@ -9,6 +9,7 @@ import (
 	"github.com/nerdatmath/aoc2022/day1"
 	"github.com/nerdatmath/aoc2022/day2"
 	"github.com/nerdatmath/aoc2022/day3"
+	"github.com/nerdatmath/aoc2022/day4"
 )
 
 func main() {
@@ -38,6 +39,20 @@ func main() {
 		if err := day3.Part2(); err != nil {
 			log.Fatalln(err)
 		}
+	case "4":
+		if err := day4.Part1(); err != nil {
+			log.Fatalln(err)
+		}
+		if err := day4.Part2(); err != nil {
+			log.Fatalln(err)
+		}
+	// case "X":
+	// 	if err := dayX.Part1(); err != nil {
+	// 		log.Fatalln(err)
+	// 	}
+	// 	if err := dayX.Part2(); err != nil {
+	// 		log.Fatalln(err)
+	// 	}
 	default:
 		log.Fatalf("invalid day number %q", os.Args[1])
 	}
