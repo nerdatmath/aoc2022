@@ -8,6 +8,7 @@ import (
 
 	"github.com/nerdatmath/aoc2022/day1"
 	"github.com/nerdatmath/aoc2022/day2"
+	"github.com/nerdatmath/aoc2022/day3"
 )
 
 func main() {
@@ -28,6 +29,13 @@ func main() {
 			log.Fatalln(err)
 		}
 		if err := day2.Part2(); err != nil {
+			log.Fatalln(err)
+		}
+	case "3":
+		if err := day3.Part1(); err != nil {
+			log.Fatalln(err)
+		}
+		if err := day3.Part2(); err != nil {
 			log.Fatalln(err)
 		}
 	default:
