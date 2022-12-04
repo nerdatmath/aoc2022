@@ -7,8 +7,9 @@ import (
 
 // Solution is the interface that puzzle solutions must implement.
 type Solution interface {
-	Part1(p []byte) error
-	Part2(p []byte) error
+	Parse(p []byte) error
+	Part1()
+	Part2()
 }
 
 var solutions = map[string]Solution{}

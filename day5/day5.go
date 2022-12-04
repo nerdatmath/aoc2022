@@ -9,14 +9,16 @@ import (
 
 type solution struct{}
 
-func (solution) Part1(p []byte) error {
+func (sol *solution) Parse(s []byte) error {
 	return errors.New("notimplemented")
 }
 
-func (solution) Part2(p []byte) error {
-	return errors.New("notimplemented")
+func (sol solution) Part1() {
+}
+
+func (sol solution) Part2() {
 }
 
 func init() {
-	aoc.RegisterSolution("5", solution{})
+	aoc.RegisterSolution("5", &solution{})
 }

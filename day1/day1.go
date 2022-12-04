@@ -2,10 +2,10 @@
 package day1
 
 import (
-	"bytes"
 	"fmt"
-	"sort"
 	"strconv"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/nerdatmath/aoc2022/aoc"
 )
@@ -15,62 +15,34 @@ type elf struct {
 }
 
 func (e elf) calories() int {
-	sum := 0
-	for _, c := range e.food {
-		sum += c
-	}
-	return sum
+	return aoc.Sum(e.food)
 }
 
-func parseElves(b []byte) ([]elf, error) {
-	groups := bytes.Split(b, []byte{'\n', '\n'})
-	elves := []elf(nil)
-	for _, g := range groups {
-		e := elf{}
-		for _, line := range bytes.Split(g, []byte{'\n'}) {
-			cals, err := strconv.Atoi(string(line))
-			if err != nil {
-				return nil, err
-			}
-			e.food = append(e.food, cals)
-		}
-		elves = append(elves, e)
-	}
-	return elves, nil
+func parseElf(s []byte) (elf, error) {
+	food, err := aoc.ParseLines(s, func(s []byte) (int, error) { return strconv.Atoi(string(s)) })
+	return elf{food: food}, err
 }
 
-type solution struct{}
-
-func (solution) Part1(b []byte) error {
-	elves, err := parseElves(b)
-	if err != nil {
-		return err
-	}
-	max := 0
-	for _, e := range elves {
-		c := e.calories()
-		if c > max {
-			max = c
-		}
-	}
-	fmt.Println("Part 1", max)
-	return nil
+type solution struct {
+	elves []elf
 }
 
-func (solution) Part2(p []byte) error {
-	elves, err := parseElves(p)
-	if err != nil {
-		return err
-	}
-	calories := []int{}
-	for _, elf := range elves {
-		calories = append(calories, elf.calories())
-	}
-	sort.Sort(sort.Reverse(sort.IntSlice(calories)))
-	fmt.Println("Part 2", calories[0]+calories[1]+calories[2])
-	return nil
+func (sol *solution) Parse(s []byte) error {
+	elves, err := aoc.ParseDelimited(s, parseElf, []byte("\n\n"))
+	sol.elves = elves
+	return err
+}
+
+func (sol solution) Part1() {
+	fmt.Println("Part 1", aoc.Max(aoc.Map(elf.calories, sol.elves)))
+}
+
+func (sol solution) Part2() {
+	cs := aoc.Map(elf.calories, sol.elves)
+	slices.SortFunc(cs, func(a, b int) bool { return a > b })
+	fmt.Println("Part 2", aoc.Sum(cs[0:3]))
 }
 
 func init() {
-	aoc.RegisterSolution("1", solution{})
+	aoc.RegisterSolution("1", &solution{})
 }

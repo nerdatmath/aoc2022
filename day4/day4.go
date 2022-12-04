@@ -2,7 +2,6 @@
 package day4
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 
@@ -25,20 +24,15 @@ type pair struct {
 	a, b assignment
 }
 
-func parsePair(p []byte) (pair, error) {
-	parts := bytes.Split(p, []byte{','})
-	if len(parts) != 2 {
-		return pair{}, errors.New("invalid pair")
+func parsePair(s []byte) (pair, error) {
+	as, err := aoc.ParseDelimited(s, parseAssignment, []byte{','})
+	if err == nil && len(as) != 2 {
+		err = errors.New("invalid pair")
 	}
-	a, err := parseAssignment(parts[0])
 	if err != nil {
 		return pair{}, err
 	}
-	b, err := parseAssignment(parts[1])
-	if err != nil {
-		return pair{}, err
-	}
-	return pair{a, b}, nil
+	return pair{as[0], as[1]}, nil
 }
 
 func contains(a, b assignment) bool {
@@ -57,51 +51,24 @@ func (p pair) overlapping() bool {
 	return overlaps(p.a, p.b)
 }
 
-func parsePairs(p []byte) ([]pair, error) {
-	lines := bytes.Split(p, []byte{'\n'})
-	ps := []pair(nil)
-	for _, line := range lines {
-		pr, err := parsePair(line)
-		if err != nil {
-			return nil, err
-		}
-		ps = append(ps, pr)
-	}
-	return ps, nil
+type solution struct {
+	pairs []pair
 }
 
-type solution struct{}
-
-func (solution) Part1(p []byte) error {
-	ps, err := parsePairs(p)
-	if err != nil {
-		return err
-	}
-	count := 0
-	for _, pair := range ps {
-		if pair.fullyContained() {
-			count++
-		}
-	}
-	fmt.Println("Part 1", count)
-	return nil
+func (sol *solution) Parse(s []byte) error {
+	pairs, err := aoc.ParseLines(s, parsePair)
+	sol.pairs = pairs
+	return err
 }
 
-func (solution) Part2(p []byte) error {
-	ps, err := parsePairs(p)
-	if err != nil {
-		return err
-	}
-	count := 0
-	for _, pair := range ps {
-		if pair.overlapping() {
-			count++
-		}
-	}
-	fmt.Println("Part 1", count)
-	return nil
+func (sol solution) Part1() {
+	fmt.Println("Part 1", len(aoc.Filter(pair.fullyContained, sol.pairs)))
+}
+
+func (sol solution) Part2() {
+	fmt.Println("Part 2", len(aoc.Filter(pair.overlapping, sol.pairs)))
 }
 
 func init() {
-	aoc.RegisterSolution("4", solution{})
+	aoc.RegisterSolution("4", &solution{})
 }

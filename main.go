@@ -30,10 +30,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if err := s.Part1(p); err != nil {
+	if err := s.Parse(p); err != nil {
 		log.Fatalln(err)
 	}
-	if err := s.Part2(p); err != nil {
-		log.Fatalln(err)
-	}
+	s.Part1()
+	s.Part2()
 }

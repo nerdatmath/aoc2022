@@ -2,7 +2,6 @@
 package day3
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/nerdatmath/aoc2022/aoc"
@@ -48,7 +47,7 @@ func intersect(a, b []item) []item {
 	return intersection
 }
 
-func parseRucksack(p []byte) rucksack {
+func parseRucksack(p []byte) (rucksack, error) {
 	items := []item(nil)
 	for _, b := range p {
 		items = append(items, item(b))
@@ -56,44 +55,36 @@ func parseRucksack(p []byte) rucksack {
 	l := len(items) / 2
 	return rucksack{
 		compartments: [2][]item{items[:l], items[l:]},
-	}
+	}, nil
 }
 
-func parseRucksacks(b []byte) []rucksack {
-	lines := bytes.Split(b, []byte{'\n'})
-	rs := []rucksack(nil)
-	for _, l := range lines {
-		rs = append(rs, parseRucksack(l))
-	}
-	return rs
+type solution struct {
+	elves []rucksack
 }
 
-type solution struct{}
+func (sol *solution) Parse(p []byte) error {
+	elves, err := aoc.ParseLines(p, parseRucksack)
+	sol.elves = elves
+	return err
+}
 
-func (solution) Part1(p []byte) error {
-	rs := parseRucksacks(p)
-	sum := 0
-	for _, r := range rs {
-		sum += r.dupe().priority()
-	}
+func (sol solution) Part1() {
+	sum := aoc.Sum(aoc.Map(func(r rucksack) int { return r.dupe().priority() }, sol.elves))
 	fmt.Println("Part 1", sum)
-	return nil
 }
 
-func (solution) Part2(p []byte) error {
-	rs := parseRucksacks(p)
+func (sol solution) Part2() {
 	sum := 0
-	for i := 0; i < len(rs); i += 3 {
-		v := intersect(intersect(rs[i].items(), rs[i+1].items()), rs[i+2].items())
+	for i := 0; i < len(sol.elves); i += 3 {
+		v := intersect(intersect(sol.elves[i].items(), sol.elves[i+1].items()), sol.elves[i+2].items())
 		if len(v) != 1 {
 			panic("too few or too many")
 		}
 		sum += v[0].priority()
 	}
 	fmt.Println("Part 2", sum)
-	return nil
 }
 
 func init() {
-	aoc.RegisterSolution("3", solution{})
+	aoc.RegisterSolution("3", &solution{})
 }
