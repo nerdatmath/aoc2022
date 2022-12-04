@@ -13,6 +13,7 @@ import (
 	_ "github.com/nerdatmath/aoc2022/day2"
 	_ "github.com/nerdatmath/aoc2022/day3"
 	_ "github.com/nerdatmath/aoc2022/day4"
+	_ "github.com/nerdatmath/aoc2022/day5"
 )
 
 func main() {
