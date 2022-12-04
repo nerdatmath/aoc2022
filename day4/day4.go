@@ -3,6 +3,7 @@ package day4
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/nerdatmath/aoc2022/aoc"
@@ -12,40 +13,73 @@ type assignment struct {
 	s, e int
 }
 
-func parseAssignment(p []byte) ([2]assignment, error) {
-	var a, b assignment
-	if _, err := fmt.Sscanf(string(p), "%d-%d,%d-%d", &a.s, &a.e, &b.s, &b.e); err != nil {
-		return [2]assignment{}, nil
+func parseAssignment(p []byte) (assignment, error) {
+	var a assignment
+	if _, err := fmt.Sscanf(string(p), "%d-%d", &a.s, &a.e); err != nil {
+		return assignment{}, err
 	}
-	return [2]assignment{a, b}, nil
+	return a, nil
 }
 
-func parseAssignments(p []byte) ([][2]assignment, error) {
+type pair struct {
+	a, b assignment
+}
+
+func parsePair(p []byte) (pair, error) {
+	parts := bytes.Split(p, []byte{','})
+	if len(parts) != 2 {
+		return pair{}, errors.New("invalid pair")
+	}
+	a, err := parseAssignment(parts[0])
+	if err != nil {
+		return pair{}, err
+	}
+	b, err := parseAssignment(parts[1])
+	if err != nil {
+		return pair{}, err
+	}
+	return pair{a, b}, nil
+}
+
+func contains(a, b assignment) bool {
+	return a.s <= b.s && a.e >= b.e
+}
+
+func overlaps(a, b assignment) bool {
+	return a.s <= b.e && a.e >= b.s
+}
+
+func (p pair) fullyContained() bool {
+	return contains(p.a, p.b) || contains(p.b, p.a)
+}
+
+func (p pair) overlapping() bool {
+	return overlaps(p.a, p.b)
+}
+
+func parsePairs(p []byte) ([]pair, error) {
 	lines := bytes.Split(p, []byte{'\n'})
-	as := [][2]assignment(nil)
+	ps := []pair(nil)
 	for _, line := range lines {
-		a, err := parseAssignment(line)
+		pr, err := parsePair(line)
 		if err != nil {
 			return nil, err
 		}
-		as = append(as, a)
+		ps = append(ps, pr)
 	}
-	return as, nil
+	return ps, nil
 }
 
 type solution struct{}
 
 func (solution) Part1(p []byte) error {
-	as, err := parseAssignments(p)
+	ps, err := parsePairs(p)
 	if err != nil {
 		return err
 	}
 	count := 0
-	for _, pair := range as {
-		a, b := pair[0], pair[1]
-		if a.s <= b.s && a.e >= b.e {
-			count++
-		} else if b.s <= a.s && b.e >= a.e {
+	for _, pair := range ps {
+		if pair.fullyContained() {
 			count++
 		}
 	}
@@ -54,18 +88,17 @@ func (solution) Part1(p []byte) error {
 }
 
 func (solution) Part2(p []byte) error {
-	as, err := parseAssignments(p)
+	ps, err := parsePairs(p)
 	if err != nil {
 		return err
 	}
 	count := 0
-	for _, pair := range as {
-		a, b := pair[0], pair[1]
-		if a.s <= b.e && a.e >= b.s {
+	for _, pair := range ps {
+		if pair.overlapping() {
 			count++
 		}
 	}
-	fmt.Println("Part 2", count)
+	fmt.Println("Part 1", count)
 	return nil
 }
 
