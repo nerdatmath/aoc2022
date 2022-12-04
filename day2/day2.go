@@ -53,11 +53,6 @@ func (sol *solution) Parse(s []byte) error {
 }
 
 func (sol solution) Part1() {
-	for i := 0; i < 9; i++ {
-		abc := i % 3
-		xyz := i / 3
-		fmt.Println(abc, xyz, scoreV1(entry{abc, xyz}))
-	}
 	scores := aoc.Map(scoreV1, sol.entries)
 	fmt.Println("Part 1", aoc.Sum(scores))
 }
