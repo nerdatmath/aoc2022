@@ -12,6 +12,7 @@ import (
 	_ "github.com/nerdatmath/aoc2022/day1"
 	_ "github.com/nerdatmath/aoc2022/day10"
 	_ "github.com/nerdatmath/aoc2022/day11"
+	_ "github.com/nerdatmath/aoc2022/day12"
 	_ "github.com/nerdatmath/aoc2022/day2"
 	_ "github.com/nerdatmath/aoc2022/day2b"
 	_ "github.com/nerdatmath/aoc2022/day3"
