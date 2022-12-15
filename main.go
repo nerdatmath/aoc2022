@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/nerdatmath/aoc2022/day1"
 	_ "github.com/nerdatmath/aoc2022/day10"
+	_ "github.com/nerdatmath/aoc2022/day11"
 	_ "github.com/nerdatmath/aoc2022/day2"
 	_ "github.com/nerdatmath/aoc2022/day2b"
 	_ "github.com/nerdatmath/aoc2022/day3"
@@ -22,12 +23,7 @@ import (
 	_ "github.com/nerdatmath/aoc2022/day9"
 )
 
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintln(os.Stderr, "day number required")
-		os.Exit(1)
-	}
-	day := os.Args[1]
+func runPart(day string, part func(aoc.Solution)) error {
 	s, err := aoc.Lookup(day)
 	if err != nil {
 		log.Fatalln(err)
@@ -39,6 +35,19 @@ func main() {
 	if err := s.Parse(p); err != nil {
 		log.Fatalln(err)
 	}
-	s.Part1()
-	s.Part2()
+	part(s)
+	return nil
+}
+
+func main() {
+	if len(os.Args) != 2 {
+		fmt.Fprintln(os.Stderr, "day number required")
+		os.Exit(1)
+	}
+	day := os.Args[1]
+	for _, part := range []func(aoc.Solution){aoc.Solution.Part1, aoc.Solution.Part2} {
+		if err := runPart(day, part); err != nil {
+			log.Fatalln(err)
+		}
+	}
 }
