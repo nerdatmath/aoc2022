@@ -5,83 +5,79 @@ import (
 	"bytes"
 	"fmt"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/nerdatmath/aoc2022/aoc"
 )
 
-type node [2]int
+type node struct{ x, y int }
 
 type solution struct {
 	start, end node
-	edges      map[node][]node
+	heights    map[node]byte
 }
 
-func (sol *solution) addEdge(f, t node) {
-	sol.edges[f] = append(sol.edges[f], t)
+func (sol *solution) edges(n node) []node {
+	h := sol.heights[n]
+	edges := []node{}
+	for _, p := range []node{{n.x, n.y - 1}, {n.x, n.y + 1}, {n.x - 1, n.y}, {n.x + 1, n.y}} {
+		if ph, ok := sol.heights[p]; ok && ph <= h+1 {
+			edges = append(edges, p)
+		}
+	}
+	return edges
 }
 
 func (sol *solution) Parse(s []byte) error {
-	sol.edges = make(map[node][]node)
+	sol.heights = make(map[node]byte)
 	lines := bytes.Split(s, []byte{'\n'})
-	for y := range lines {
-		for x := range lines[y] {
-			n := node{x, y}
-			switch lines[y][x] {
+	n := node{}
+	for n.y = range lines {
+		for n.x = range lines[n.y] {
+			h := lines[n.y][n.x]
+			switch h {
 			case 'S':
 				sol.start = n
-				lines[y][x] = 'a'
+				sol.heights[n] = 'a'
 			case 'E':
 				sol.end = n
-				lines[y][x] = 'z'
-			}
-		}
-	}
-	for y := range lines {
-		for x := range lines[y] {
-			h := lines[y][x]
-			n := node{x, y}
-			if y > 0 && lines[y-1][x] <= h+1 {
-				sol.addEdge(n, node{x, y - 1})
-			}
-			if y > 0 && h <= lines[y-1][x]+1 {
-				sol.addEdge(node{x, y - 1}, n)
-			}
-			if x > 0 && lines[y][x-1] <= h+1 {
-				sol.addEdge(n, node{x - 1, y})
-			}
-			if x > 0 && h <= lines[y][x-1]+1 {
-				sol.addEdge(node{x - 1, y}, n)
+				sol.heights[n] = 'z'
+			default:
+				sol.heights[n] = h
 			}
 		}
 	}
 	return nil
 }
 
-func (sol solution) Part1() {
-	visited := map[node]struct{}{sol.start: {}}
-	active := map[node]struct{}{sol.start: {}}
-	steps := 0
-	for {
-		// fmt.Println("step", steps)
-		if _, ok := visited[sol.end]; ok {
-			break
+func seek(start mapset.Set[node], end node, edges func(node) []node) int {
+	active := start
+	visited := start.Clone()
+	var steps int
+	for steps = 0; !visited.Contains(end); steps++ {
+		next := mapset.NewSet[node]()
+		for n := range active.Iter() {
+			next = next.Union(mapset.NewSet(edges(n)...))
 		}
-		next := map[node]struct{}{}
-		for n := range active {
-			for _, p := range sol.edges[n] {
-				if _, ok := visited[p]; !ok {
-					// fmt.Println("visiting", p)
-					next[p] = struct{}{}
-					visited[p] = struct{}{}
-				}
-			}
-		}
-		active = next
-		steps++
+		active = next.Difference(visited)
+		visited = visited.Union(active)
 	}
+	return steps
+}
+
+func (sol solution) Part1() {
+	steps := seek(mapset.NewSet(sol.start), sol.end, sol.edges)
 	fmt.Println("Part 1", steps)
 }
 
 func (sol solution) Part2() {
+	start := mapset.NewSet[node]()
+	for n, h := range sol.heights {
+		if h == 'a' {
+			start.Add(n)
+		}
+	}
+	steps := seek(start, sol.end, sol.edges)
+	fmt.Println("Part 2", steps)
 }
 
 func init() {
