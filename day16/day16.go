@@ -2,7 +2,6 @@
 package day16
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -20,14 +19,14 @@ type valve struct {
 func parseValve(s []byte) (valve, error) {
 	var name string
 	var rate int
-	p := bytes.Index(s, []byte("; "))
-	_, err := fmt.Sscanf(string(s[:p]), "Valve %s has flow rate=%d", &name, &rate)
+	str := string(s)
+	_, err := fmt.Sscanf(str, "Valve %s has flow rate=%d;", &name, &rate)
 	if err != nil {
 		return valve{}, err
 	}
-	connected := string(s[p+2:])
-	connected = strings.TrimPrefix(connected, "tunnels lead to valves ")
-	connected = strings.TrimPrefix(connected, "tunnel leads to valve ")
+	connected := str[strings.Index(str, ";"):]
+	connected = strings.TrimPrefix(connected, "; tunnel leads to valve ")
+	connected = strings.TrimPrefix(connected, "; tunnels lead to valves ")
 	return valve{
 		name:      name,
 		rate:      rate,
