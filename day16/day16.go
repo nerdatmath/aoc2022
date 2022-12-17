@@ -98,15 +98,33 @@ type actor struct {
 	time int
 }
 
-func best(actors []actor, targets []valve, paths map[[2]string]int) int {
+type pq []actor
+
+func (p *pq) pop() actor {
+	a := (*p)[0]
+	*p = (*p)[1:]
+	return a
+}
+
+func (p *pq) push(a actor) {
+	*p = append(*p, a)
+	slices.SortFunc(*p, func(a, b actor) bool { return a.time > b.time })
+}
+
+func (p *pq) clone() pq {
+	return pq(slices.Clone(*p))
+}
+
+func best(actors pq, targets []valve, paths map[[2]string]int) int {
+	a := actors.pop()
 	max := 0
 	for i, t := range targets {
-		timeLeft := actors[0].time - (paths[[2]string{actors[0].pos, t.name}] + 1)
+		timeLeft := a.time - (paths[[2]string{a.pos, t.name}] + 1)
 		if timeLeft <= 0 {
 			continue
 		}
-		actors := append(slices.Clone(actors[1:]), actor{pos: t.name, time: timeLeft})
-		slices.SortFunc(actors, func(a, b actor) bool { return a.time > b.time })
+		actors := actors.clone()
+		actors.push(actor{pos: t.name, time: timeLeft})
 		remaining := slices.Delete(slices.Clone(targets), i, i+1)
 		score := timeLeft*t.rate + best(actors, remaining, paths)
 		if score > max {
