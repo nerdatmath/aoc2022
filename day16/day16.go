@@ -48,22 +48,6 @@ func (sol *solution) Parse(s []byte) error {
 	return err
 }
 
-// This seems like a traveling salesman problem.
-// We want to visit each node (valve with rate > 0) via the shortest route
-// and visit them in the order that maximizes the total metric.
-
-// let dist be a |V| × |V| array of minimum distances initialized to ∞ (infinity)
-// for each edge (u, v) do
-//     dist[u][v] ← w(u, v)  // The weight of the edge (u, v)
-// for each vertex v do
-//     dist[v][v] ← 0
-// for k from 1 to |V|
-//     for i from 1 to |V|
-//         for j from 1 to |V|
-//             if dist[i][j] > dist[i][k] + dist[k][j]
-//                 dist[i][j] ← dist[i][k] + dist[k][j]
-//             end if
-
 func shortestPaths(nodes []string, edges mapset.Set[[2]string]) map[[2]string]int {
 	g := map[[2]string]int{}
 	for e := range edges.Iter() {
