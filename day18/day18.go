@@ -58,30 +58,25 @@ func inBounds(p point) bool {
 	return -5 <= p.x && p.x <= 25 && -5 <= p.y && p.y <= 25 && -5 <= p.z && p.z <= 25
 }
 
-func dfs(active mapset.Set[point], blocked mapset.Set[point], inBounds func(point) bool) mapset.Set[point] {
-	visited := mapset.NewSet[point]()
-	for active.Cardinality() != 0 {
-		visited = visited.Union(active)
-		next := []point{}
-		for n := range active.Iter() {
-			for _, p := range neighbors(n) {
-				if !inBounds(p) {
-					continue
-				}
-				next = append(next, p)
-			}
-		}
-		active = mapset.NewSet(next...).Difference(visited).Difference(blocked)
-	}
-	return visited
-}
-
 func (sol solution) Part2() {
 	// Flood fill to find all the exterior cubes.
 	// Everything else is interior.
 	// We know (0,0,0) is in the exterior.
 	lava := mapset.NewSet(sol.points...)
-	exterior := dfs(mapset.NewSet(point{0, 0, 0}), lava, inBounds)
+	exterior := mapset.NewSet[point]()
+	aoc.BFS(
+		[]point{{0, 0, 0}},
+		func(p point) []point {
+			exterior.Add(p)
+			pts := []point{}
+			for _, n := range neighbors(p) {
+				if inBounds(n) && !lava.Contains(n) {
+					pts = append(pts, n)
+				}
+			}
+			return pts
+		},
+	)
 	area := 0
 	for _, p := range sol.points {
 		for _, n := range neighbors(p) {

@@ -3,6 +3,8 @@ package aoc
 import (
 	"bytes"
 	"math"
+
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 // ParseDelimited runs a parser on each section.
@@ -66,4 +68,18 @@ func Filter[A any](f func(A) bool, as []A) []A {
 		}
 	}
 	return out
+}
+
+// Breadth First Search.
+func BFS[T comparable](start []T, edges func(T) []T) {
+	active := mapset.NewSet(start...)
+	visited := mapset.NewSet[T]()
+	for active.Cardinality() != 0 {
+		visited = visited.Union(active)
+		next := []T{}
+		for n := range active.Iter() {
+			next = append(next, edges(n)...)
+		}
+		active = mapset.NewSet(next...).Difference(visited)
+	}
 }
