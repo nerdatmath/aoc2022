@@ -68,89 +68,98 @@ func (r rock) shift(d direction) rock {
 	return out
 }
 
-func (r rock) collides(chamber []scanline) bool {
+func (r rock) collides(chamber []scanline, pos int) bool {
+	if pos < 0 {
+		return true
+	}
 	for i, s := range r {
-		if s&walls != 0 || len(chamber) > i && s&chamber[i] != 0 {
+		if s&walls != 0 || len(chamber) > i+pos && s&chamber[i+pos] != 0 {
 			return true
 		}
 	}
 	return false
 }
 
-func (sol solution) simulate(count int) int {
-	chamber := []scanline{}
-	time := 0
-	floor := 0
-	type compactState struct {
-		rocknum, dirpos int
-		chamber         [4]scanline
+type state struct {
+	rockpos int
+	dirpos  int
+	floor   int
+	chamber []scanline
+}
+
+func (sol solution) step(s *state) {
+	r := rocks[s.rockpos]
+	s.rockpos = (s.rockpos + 1) % len(rocks)
+	pos := len(s.chamber) + 3
+	for ; ; pos-- {
+		n := r.shift(sol.dir[s.dirpos])
+		s.dirpos = (s.dirpos + 1) % len(sol.dir)
+		if !n.collides(s.chamber, pos) {
+			r = n
+		}
+		if r.collides(s.chamber, pos-1) {
+			break
+		}
 	}
+	if pos+len(r) > len(s.chamber) {
+		s.chamber = slices.Grow(s.chamber, pos+len(r)-len(s.chamber))[:pos+len(r)]
+	}
+	for _, sl := range r {
+		s.chamber[pos] |= sl
+		if s.chamber[pos] == 0b0111111100000000 {
+			s.floor += pos
+			s.chamber = s.chamber[pos:]
+			pos = 0
+		}
+		pos++
+	}
+}
+
+type compactState struct {
+	rockpos int
+	dirpos  int
+	chamber [4]scanline
+}
+
+func (s *state) compactState() (compactState, bool) {
+	if len(s.chamber) > 4 {
+		return compactState{}, false
+	}
+	cs := compactState{
+		rockpos: s.rockpos,
+		dirpos:  s.dirpos,
+	}
+	copy(cs.chamber[:], s.chamber)
+	return cs, true
+}
+
+func (sol solution) simulate(count int) int {
+	s := state{}
 	type counts struct {
-		rocks int
+		count int
 		floor int
 	}
 	seen := map[compactState]counts{}
 	foundRecurrence := false
-	for i := 0; i < count; i++ {
-		r := rocks[i%len(rocks)]
-		// rock appears 3 rows above the top
-		chamber = append(chamber, 0, 0, 0)
-		var pos int
-		for pos = len(chamber); pos >= 0 && !r.collides(chamber[pos:]); pos-- {
-			n := r.shift(sol.dir[time%len(sol.dir)])
-			time++
-			if !n.collides(chamber[pos:]) {
-				r = n
-			}
-		}
-		pos++
-		for _, s := range r {
-			if len(chamber) <= pos {
-				chamber = append(chamber, 0)
-			}
-			chamber[pos] |= s
-			if chamber[pos] == 0b0111111100000000 {
-				floor += pos + 1
-				chamber = chamber[pos+1:]
-				pos = 0
-				continue
-			}
-			pos++
-		}
-		for len(chamber) > 0 && chamber[len(chamber)-1] == 0 {
-			chamber = chamber[:len(chamber)-1]
-		}
-		if foundRecurrence {
-			continue
-		}
-		if len(chamber) < 4 {
-			// Check to see if our complete state has been seen before.
-			state := compactState{
-				rocknum: i % len(rocks),
-				dirpos:  time % len(sol.dir),
-			}
-			copy(state.chamber[:], chamber)
-			new := counts{
-				rocks: i,
-				floor: floor,
-			}
-			old, ok := seen[state]
+	for ; count > 0; count-- {
+		sol.step(&s)
+		if cs, ok := s.compactState(); ok && !foundRecurrence {
+			old, ok := seen[cs]
 			if !ok {
-				seen[state] = new
+				seen[cs] = counts{
+					count: count,
+					floor: s.floor,
+				}
 				continue
 			}
 			// we found a repeated state, so we can fast forward
 			foundRecurrence = true
-			diff := counts{
-				rocks: new.rocks - old.rocks,
-				floor: new.floor - old.floor,
-			}
-			jump := (count - i) / diff.rocks
-			floor += jump * diff.floor
-			i += jump * diff.rocks
+			jump := count / (old.count - count)
+			s.floor += jump * (s.floor - old.floor)
+			count -= jump * (old.count - count)
 		}
 	}
-	return floor + len(chamber)
+	return s.floor + len(s.chamber)
 }
 
 func (sol solution) Part1() {
