@@ -140,10 +140,9 @@ func (sol solution) simulate(count int) int {
 		floor int
 	}
 	seen := map[compactState]counts{}
-	foundRecurrence := false
 	for ; count > 0; count-- {
 		sol.step(&s)
-		if cs, ok := s.compactState(); ok && !foundRecurrence {
+		if cs, ok := s.compactState(); ok {
 			old, ok := seen[cs]
 			if !ok {
 				seen[cs] = counts{
@@ -153,11 +152,14 @@ func (sol solution) simulate(count int) int {
 				continue
 			}
 			// we found a repeated state, so we can fast forward
-			foundRecurrence = true
 			jump := count / (old.count - count)
 			s.floor += jump * (s.floor - old.floor)
 			count -= jump * (old.count - count)
+			break
 		}
+	}
+	for ; count > 0; count-- {
+		sol.step(&s)
 	}
 	return s.floor + len(s.chamber)
 }
